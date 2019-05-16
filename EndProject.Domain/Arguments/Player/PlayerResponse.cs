@@ -2,7 +2,7 @@
 
 namespace EndProject.Domain.Arguments.Player
 {
-   public class PlayerResponse
+    public class PlayerResponse
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -11,7 +11,7 @@ namespace EndProject.Domain.Arguments.Player
 
         public static explicit operator PlayerResponse(Entities.Player entidade)
         {
-            return new PlayerResponse()
+            return new PlayerResponse
             {
                 Email = entidade.Email.Address,
                 Name = entidade.Name.FirstName,
