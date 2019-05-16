@@ -1,17 +1,15 @@
-﻿using Microsoft.Owin.Security.OAuth;
-using Microsoft.Practices.Unity;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using EndProject.Domain.Arguments.Player;
-using EndProject.Domain.ValueObjects;
 using EndProject.Service.Interfaces;
-using EndProject.Service.Service;
+using Microsoft.Owin.Security.OAuth;
+using Newtonsoft.Json;
 using Unity;
-namespace XGame.Api.Security
+
+namespace EndProject.API.Security
 {
     public class AuthorizationProvider : OAuthAuthorizationServerProvider
     {
@@ -59,7 +57,6 @@ namespace XGame.Api.Security
             catch (Exception ex)
             {
                 context.SetError("invalid_grant", ex.Message);
-                return;
             }
         }
     }

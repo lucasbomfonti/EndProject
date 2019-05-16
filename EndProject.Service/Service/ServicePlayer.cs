@@ -1,25 +1,20 @@
 ﻿using prmToolkit.NotificationPattern;
-using prmToolkit.NotificationPattern.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using EndProject.Domain.Arguments.Base;
 using EndProject.Domain.Arguments.Player;
 using EndProject.Domain.Entities;
 using EndProject.Domain.ValueObjects;
 using EndProject.Service.Interfaces;
-using EndProject.Service.Interfaces.Base;
 using EndProject.Service.Repositories;
 
 namespace EndProject.Service.Service
 {
-    public class ServicePlayer : Notifiable, IServiceBase, IServicePlayer
+    public class ServicePlayer : Notifiable, IServicePlayer
     {
         private readonly IRepositoryPlayer _repository;
-
-        public ServicePlayer()
-        {
-        }
 
         public ServicePlayer(IRepositoryPlayer repository)
         {
@@ -28,15 +23,27 @@ namespace EndProject.Service.Service
      
         public AddPlayerResponse AddPlayer(AddPlayerRequest request)
         {
-            var nome = new Name("Teste", "Testado");
-            Email email = new Email("Teste@teste.com");
+            var nome = new Name(request.Name.FirstName, request.Password);
+            Email email = new Email(request.Email.Address);
 
-            Player player = new Player(nome, email, "1324567");
-            
+            Player player = new Player(nome, email, request.Password);
 
-             player =  _repository.Add(player);
+            AddNotifications(nome, email);
 
-            return (AddPlayerResponse) player;
+            if (_repository.Existe(x => x.Email == request.Email))
+            {
+                AddNotification("E-mail","fail");
+            }
+
+            if (IsInvalid())
+            {
+                return null;
+            }
+
+            player = _repository.Add(player);
+
+
+            return (AddPlayerResponse)player;
         }
 
         public ChangePlayerResponse ChangePlayer(ChangePlayerRequest request)
@@ -46,6 +53,7 @@ namespace EndProject.Service.Service
                 AddNotification("ChangePlayerResponse", "is required");
             }
 
+            Debug.Assert(request != null, nameof(request) + " != null");
             Player player = _repository.GetById(request.Id);
 
             if (player == null)
@@ -57,7 +65,7 @@ namespace EndProject.Service.Service
             var email = new Email(request.Email);
            
 
-            player.ChangePlayer(name, email, player.Status);
+            player?.ChangePlayer(name, email, player.Status);
 
             AddNotifications(player);
             if (IsInvalid())
@@ -83,8 +91,8 @@ namespace EndProject.Service.Service
             }
 
             
-                var email = new Email(request.Email);
-                var player = new Player(email,request.Password);  
+                var email = new Email(request?.Email);
+                var player = new Player(email,request?.Password);  
             
                 AddNotifications(player, email);
                 if (player.IsInvalid())
@@ -92,8 +100,10 @@ namespace EndProject.Service.Service
                     return null;
                 }
 
-            player = _repository.GetBy(x => x.Email.Address == player.Email.Address,
-                x => x.Password == player.Password); 
+            var player1 = player;
+            var player2 = player;
+            player = _repository.GetBy(x => x.Email.Address == player1.Email.Address,
+                x => x.Password == player2.Password); 
             return (AuthenticatePlayerResponse) player;
         }
 

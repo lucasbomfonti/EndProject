@@ -1,4 +1,5 @@
 ﻿using System;
+using EndProject.API.Security;
 using EndProject.Infra.Persistence;
 using EndProject.Infra.Persistence.Repositores;
 using EndProject.Service.Interfaces;
@@ -6,25 +7,22 @@ using EndProject.Service.Repositories;
 using EndProject.Service.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.OAuth;
-using XGame.Api.Security;
+using Owin;
+using Swashbuckle.AspNetCore.Swagger;
+using Unity;
 
 namespace EndProject.API
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment environment)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder().SetBasePath(environment.ContentRootPath)
-                .AddJsonFile("appsettings.json", false, true)
-                .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -32,11 +30,11 @@ namespace EndProject.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             services.AddTransient<IServicePlayer, ServicePlayer>();
             services.AddTransient<IRepositoryPlayer, RepositoryPlayer>();
-            services.AddMvc();
-
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info { Title = "APIUsuarios", Version = "v1" }); });
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info { Title = "EndProject", Version = "v1" }); });
 
         }
 
@@ -47,13 +45,33 @@ namespace EndProject.API
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseMvc();
+
             app.UseMvc();
 
             app.UseSwagger();
 
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "APIUsuarios V1"); });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "EndProject V1"); });
+
 
         }
+
+        public void ConfigureOAuth(IAppBuilder app, UnityContainer container)
+        {
+            OAuthAuthorizationServerOptions oAuthServerOptions = new OAuthAuthorizationServerOptions()
+            {
+                AllowInsecureHttp = true,
+                TokenEndpointPath = new PathString("/token"),
+                AccessTokenExpireTimeSpan = TimeSpan.FromHours(2),
+                Provider = new AuthorizationProvider(container)
+            };
+        }
+
     }
-    
 }

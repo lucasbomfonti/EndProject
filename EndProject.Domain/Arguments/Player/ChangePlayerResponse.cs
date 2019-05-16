@@ -1,5 +1,4 @@
 ﻿using System;
-using EndProject.Domain.Entities;
 
 namespace EndProject.Domain.Arguments.Player
 {

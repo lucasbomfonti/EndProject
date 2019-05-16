@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EndProject.Domain.Entities;
-using EndProject.Domain.ValueObjects;
-
-namespace EndProject.Domain.Arguments.Player
+﻿namespace EndProject.Domain.Arguments.Player
 {
    public class AuthenticatePlayerResponse
     {
