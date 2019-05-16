@@ -22,6 +22,7 @@ namespace EndProject.API.Controllers
             try
             {
                var response = _servicePlayer.PlayerList();
+                // teste
                 return  response;
             }
             catch (Exception e)
